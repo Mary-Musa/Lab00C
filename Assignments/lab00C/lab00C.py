@@ -38,6 +38,7 @@ class ResultsVisualizer:
     Example Usage
     ------------
     >>> viz = ResultsVisualizer()
+
     >>> fig = viz.image_grid([img1, img2], titles=["Before", "After"])
     """
 
@@ -56,7 +57,27 @@ class ResultsVisualizer:
             plotly.graph_objects.Figure: Figure with one go.Image panel per
             input image, arranged in a single row.
         """
-        raise NotImplementedError("Implement this method")
+        # raise NotImplementedError("Implement this method")
+
+        if titles is None:
+
+            titles = [f"Image {i + 1}" for i in range(len(images))] #This forms the default titles for image 1 and 2
+
+        suptitle = kwargs.get('suptitle', "")
+
+        height = kwargs.get('height', 350)
+
+        fig = make_subplots(rows=1, cols=len(images), subplot_titles=titles)#Creates a 1-row grid with one labelled panel per image
+
+        for col, image in enumerate(images, start=1):
+
+            fig.add_trace(go.Image(z=image), row=1, col=col)
+
+        fig.update_layout(title_text=suptitle, height=height) # Overall title and figure size
+
+        return fig
+
+
 
     def heatmap(self, matrix, **kwargs):
         """Display a 2D numeric array as a heatmap.
@@ -71,22 +92,61 @@ class ResultsVisualizer:
             plotly.graph_objects.Figure: Figure containing a single
             go.Heatmap trace.
         """
-        raise NotImplementedError("Implement this method")
+        #raise NotImplementedError("Implement this method")
+        
+        title = kwargs.get('title', "")# reads settings from kwargs
+        
+        colorscale = kwargs.get('colorscale', "Viridis")
+
+        fig = go.Figure(go.Heatmap(z=matrix, colorscale=colorscale))# this builds the figure and one trace together
+
+        fig.update_layout(title_text=title)
+
+        return fig # this returns the figure
+
+    
 
     def line_chart(self, x, series, **kwargs):
+
         """Plot one or more named series against a shared x-axis.
 
         Args:
             x (array-like): Shared 1D x-axis values.
+
             series (dict[str, array-like]): Maps trace name -> 1D y-values
+
                 (same length as x).
+
             **kwargs:
+
                 title       (str): Figure title (default "").
+
                 xaxis_title (str): X-axis label (default "x").
+
                 yaxis_title (str): Y-axis label (default "y").
 
         Returns:
             plotly.graph_objects.Figure: Figure with one go.Scatter line
+
             trace per entry in `series`, with a legend.
         """
-        raise NotImplementedError("Implement this method")
+        # raise NotImplementedError("Implement this method")
+
+        title = kwargs.get('title', "") # gets the title settings from kwargs
+
+        xaxis_title = kwargs.get('xaxis_title', "x")
+
+        yaxis_title = kwargs.get('yaxis_title', "y")
+
+        fig = go.Figure() # this forms an empty image
+
+        for name, y in series.items():
+
+            fig.add_trace(go.Scatter(x=x, y=y, mode='lines', name=name))
+
+        fig.update_layout(title_text=title,# this labels the title and the axis 
+                          
+                          xaxis_title=xaxis_title,
+
+                          yaxis_title=yaxis_title)
+        return fig
